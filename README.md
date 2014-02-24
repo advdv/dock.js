@@ -1,4 +1,4 @@
 dock.js
 =======
 
-An easy to use Node.js module that orchestrates Docker containers that handles interdependencies for you.
+An easy-to-use Promise based Node.js module that orchestrates Docker containers and handles interdependencies for you.

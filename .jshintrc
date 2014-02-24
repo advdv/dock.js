@@ -1,0 +1,12 @@
+{
+	"predef"		: [
+		"require",
+		"module"
+	],
+	"unused" 		: true,
+	"undef": true,
+	"strict"        : true,
+	"browser"		: false,
+    "white"         : false,
+    "indent"        : 2
+}
