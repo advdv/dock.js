@@ -53,7 +53,16 @@ var sql = new Dock.Service(server, [])
 var data = new Dock.Service(server, [php, http, sql], 'busybox:latest');
 
 ```
-	
 
+All services can now be started easily:
 
+```JavaScript
+//the Service.start() function returns a promise that fulfills when 
+//all containers of this server and their depedant services are running.
+data.start().then(function(){  
+	  console.log('Services started...');
+	}).catch(function(err){
+	  console.error('something went wrong...' + err)
+	})
+```
 
