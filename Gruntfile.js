@@ -24,4 +24,7 @@ module.exports = function(grunt){
     }
   });
 
+  grunt.registerTask('default', ['watch:unitTests']);
+  grunt.registerTask('test', ['shell:unitTests']);
+
 };
