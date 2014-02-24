@@ -49,7 +49,7 @@ var sql = new Dock.Service(server, [])
 
 
 //create a single container service responsible for persisting logs and data of the other services
-// NOTE: this uses the shorthand notation, single container services can be quiet common...
+// NOTE: this uses the shorthand notation, single container services can be quite common...
 var data = new Dock.Service(server, [php, http, sql], 'busybox:latest');
 
 ```
@@ -58,11 +58,27 @@ All services can now be started easily:
 
 ```JavaScript
 //the Service.start() function returns a promise that fulfills when 
-//all containers of this server and their depedant services are running.
-data.start().then(function(){  
+//all containers of this service and the service it depends on are running.
+data.start()
+	.then(function(){  
 	  console.log('Services started...');
 	}).catch(function(err){
 	  console.error('something went wrong...' + err)
 	})
 ```
+
+Configuration
+-------------
+
+Work in progress
+
+
+Todos
+------
+This library is still in early development
+
+-   Stopping services
+-   Functionality that can group services 
+-   Complete configuration docs
+
 
