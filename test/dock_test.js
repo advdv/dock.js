@@ -13,15 +13,15 @@ Promise.onPossiblyUnhandledRejection(function(error){
 var Dock = require('../lib/dock');
 var Service = require('../lib/service');
 
-describe('Cluster()', function(){
+describe('Dock()', function(){
   'use strict';
 
-  var docker, cluster;
+  var docker, dock;
   beforeEach(function(){
     var parts = url.parse('tcp://192.168.1.50:4342');
     
     docker = stubDockerode(new Docker({host: 'http://' + parts.hostname, port: parts.port}));
-    cluster = new Dock(docker);
+    dock = new Dock(docker);
   });
 
   it('should construct as expected', function(){
@@ -36,36 +36,34 @@ describe('Cluster()', function(){
   });
 
   describe('.add(), .has(), .get()', function(){
-
     it('should add services correctly', function(){
       var s = {};
 
-      cluster.add('phpfpm', s);
-      cluster.has('phpfpm').should.equal(true);
-      cluster.get('phpfpm').should.equal(s);
+      dock.add('phpfpm', s);
+      dock.has('phpfpm').should.equal(true);
+      dock.get('phpfpm').should.equal(s);
       
       (function(){
-        cluster.get('bogus');
+        dock.get('bogus');
       }).should.throw(/Could not retrieve service/);
             
-      cluster.has('bogus').should.equal(false);
+      dock.has('bogus').should.equal(false);
     });
-
   });
 
   describe('.service()', function(){
     it('should throw on invalid deps', function(){
       (function(){
-        cluster.service('nginx', [{}]);
+        dock.service('nginx', [{}]);
       }).should.throw(/dependencies to be specified as string/);
 
     });
     
     it('should return a service instance', function(){
 
-      var s1 = cluster.service('phpfpm');
-      var s2 = cluster.service('nginx', ['phpfpm']);
-      var s3 = cluster.service('data', ['bogus']);
+      var s1 = dock.service('phpfpm');
+      var s2 = dock.service('nginx', ['phpfpm']);
+      var s3 = dock.service('data', ['bogus']);
       s2.should.be.an.instanceOf(Service);
       s2.dependencies.length.should.equal(1);
       s2.dependencies[0].should.equal(s1);
@@ -76,7 +74,39 @@ describe('Cluster()', function(){
         s3.start();
       }).should.throw(/Could not retrieve service/);
     });
+  });
+
+
+  describe('complex example', function(){
+
+    var d;
+    beforeEach(function(){
+      d = new Dock(docker);
+      d.service('srce').container('busybox:latest');
+      d.service('data', ['php', 'http']).container('busybox:latest');
+      d.service('php', ['src']).container('scstest/php-fpm:latest')
+                                  .container('scstest/php-fpm:latest')
+                                  .container('scstest/php-fpm:latest');
+
+      d.service('http', ['src', 'php']).container('dockerfile/nginx:latest');
+      d.service('sql').container('paintedfox/postgresql:latest');
+    });
+
+    it('start should throw due to misspell', function(done){
+
+      (function(){
+        d.get('data').start();
+      }).should.throw();
+      
+      //fix spelling
+      d.service('src').container('busybox:latest');
+      d.get('data').start().then(function(){
+        done();
+      });
+    });
+
 
   });
+
 
 });
