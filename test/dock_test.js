@@ -10,7 +10,7 @@ Promise.onPossiblyUnhandledRejection(function(error){
     throw error;
   });
 
-var Cluster = require('../lib/cluster');
+var Dock = require('../lib/dock');
 var Service = require('../lib/service');
 
 describe('Cluster()', function(){
@@ -21,12 +21,11 @@ describe('Cluster()', function(){
     var parts = url.parse('tcp://192.168.1.50:4342');
     
     docker = stubDockerode(new Docker({host: 'http://' + parts.hostname, port: parts.port}));
-    cluster = new Cluster(docker);
+    cluster = new Dock(docker);
   });
 
   it('should construct as expected', function(){
-    var services = [];
-    var c = new Cluster(docker);
+    var c = new Dock(docker);
 
     c.should.have.property('service').and.be.instanceOf(Function);
     c.should.have.property('get').and.be.instanceOf(Function);
@@ -34,34 +33,48 @@ describe('Cluster()', function(){
     c.should.have.property('add').and.be.instanceOf(Function);
 
     c.should.have.property('docker').and.equal(docker);
-
-    c = new Cluster(docker);
-    c.should.have.property('services').and.eql(services);
   });
 
   describe('.add(), .has(), .get()', function(){
 
     it('should add services correctly', function(){
-      var s = {name: 'phpfpm'};
+      var s = {};
 
-      cluster.add(s);
-      cluster.services.length.should.equal(1);
-      cluster.get('phpfpm').should.equal(s);
-      cluster.get('bogus').should.equal(false);
-
+      cluster.add('phpfpm', s);
       cluster.has('phpfpm').should.equal(true);
+      cluster.get('phpfpm').should.equal(s);
+      
+      (function(){
+        cluster.get('bogus');
+      }).should.throw(/Could not retrieve service/);
+            
       cluster.has('bogus').should.equal(false);
     });
 
   });
 
   describe('.service()', function(){
+    it('should throw on invalid deps', function(){
+      (function(){
+        cluster.service('nginx', [{}]);
+      }).should.throw(/dependencies to be specified as string/);
 
+    });
+    
     it('should return a service instance', function(){
 
-      var s = cluster.service('nginx');
-      s.should.be.an.instanceOf(Service);
+      var s1 = cluster.service('phpfpm');
+      var s2 = cluster.service('nginx', ['phpfpm']);
+      var s3 = cluster.service('data', ['bogus']);
+      s2.should.be.an.instanceOf(Service);
+      s2.dependencies.length.should.equal(1);
+      s2.dependencies[0].should.equal(s1);
 
+      s1.should.be.an.instanceOf(Service);
+
+      (function(){
+        s3.start();
+      }).should.throw(/Could not retrieve service/);
     });
 
   });

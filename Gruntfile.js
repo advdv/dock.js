@@ -8,7 +8,7 @@ module.exports = function(grunt){
     pkg: grunt.file.readJSON('package.json'),
     watch: {
       unitTests: {
-        files: ['lib/*.js', 'test/*_test.js', 'test/stubs/*.js'],
+        files: ['index.js', 'lib/*.js', 'test/*_test.js', 'test/stubs/*.js'],
         tasks: ['shell:unitTests'],
       },
     },
@@ -24,7 +24,8 @@ module.exports = function(grunt){
     }
   });
 
-  grunt.registerTask('default', ['watch:unitTests']);
+  grunt.registerTask('start', ['watch:unitTests']);
+  grunt.registerTask('default', ['start']);
   grunt.registerTask('test', ['shell:unitTests']);
 
 };

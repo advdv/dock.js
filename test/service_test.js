@@ -37,13 +37,28 @@ describe('Service()', function(){
     s.should.have.property('instantiated').and.equal(false);
     s.should.have.property('started').and.equal(false);
     s.should.have.property('docker').and.equal(docker);
-    s.should.have.property('dependencies').and.eql([]);
     s.should.have.property('containers').and.eql([]);
 
-
-    var s2 = new Service(docker, [], 'stepshape/nginx:latest');
+    var dep2 = {};
+    var dep = function(){ return dep2; };
+    var dep1 = {};
+    var s2 = new Service(docker, [dep1, dep], 'stepshape/nginx:latest');
     s2.containers.length.should.equal(1);
 
+    s2.dependencies[0].should.equal(dep1);
+    s2.dependencies[1].should.equal(dep2);
+  });
+
+  describe('.requires()', function(){
+    it('should add an dependency', function(){
+
+      var dep1 = {};
+      var s = service.requires(dep1);
+      s.should.equal(service);
+      service.requires(function(){ return dep1; });
+      service.dependencies[0].should.equal(dep1);
+      service.dependencies[1].should.equal(dep1);
+    });
   });
 
   describe('.add()', function(){
@@ -77,7 +92,7 @@ describe('Service()', function(){
       var c2 = new Container(docker, 'nginx');
       sinon.spy(c2, 'create');
 
-      service.dependencies.push(dep1);
+      service.requires(dep1);
       service.add(c1);
       service.add(c2);
 
@@ -163,7 +178,7 @@ describe('Service()', function(){
         var c1 = new Container(docker, 'nginx');
         sinon.spy(c1, 'start');
         service.add(c1);
-        service.dependencies.push(dep1);
+        service.requires(dep1);
 
         service.start().then(function(){
           service.configurationFn.calledOnce.should.equal(true);
@@ -183,7 +198,7 @@ describe('Service()', function(){
         var c2 = new Container(docker, 'nginx');
         sinon.spy(c2, 'start');
 
-        service.dependencies.push(dep1);
+        service.requires(dep1);
         service.add(c1);
         service.add(c2);
 

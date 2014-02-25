@@ -1,5 +1,6 @@
-module.exports = {
-  Cluster: require('./lib/cluster'),
-  Service: require('./lib/service'),
-  Container: require('./lib/container')
-};
+var Dock = require('./lib/dock');
+
+Dock.Service = require('./lib/service');
+Dock.Container = require('./lib/container');
+
+module.exports = Dock;
