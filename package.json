@@ -1,6 +1,6 @@
 {
   "name": "dock.js",
-  "version": "0.2.6",
+  "version": "0.2.8",
   "description": "An easy to use Node.js module that orchestrates Docker containers that handles interdependencies for you.",
   "main": "index.js",
   "scripts": {
