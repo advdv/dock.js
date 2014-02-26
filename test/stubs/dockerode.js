@@ -18,7 +18,7 @@ module.exports =function stubDockerode(docker) {
   sinon.stub(docker, 'startContainer', function(conf, cb){
     setTimeout(function(){
       cb();
-    },Math.floor((Math.random()*20)+1));
+    },Math.floor((Math.random()*100)+1));
   });
 
 

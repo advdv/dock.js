@@ -8,14 +8,15 @@
   },
   "author": "Ad van der Veer <advanderveer@gmail.com>",
   "license": "Apache v2",
-  "repository" : { 
-      "type" : "git", 
-      "url" : "https://github.com/advanderveer/dock.js"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/advanderveer/dock.js"
   },
-  "dependencies": {    
+  "dependencies": {
     "dockerode": "~1.2.8",
     "bluebird": "~1.0.5",
-    "args-js": "~0.10.4"
+    "args-js": "~0.10.4",
+    "winston": "~0.7.2"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

@@ -19,7 +19,7 @@ module.exports = function(grunt){
           stdout: true,
           stderr: true
         },
-        command: './node_modules/.bin/mocha ./test/*_test.js --require should'
+        command: './node_modules/.bin/mocha ./test/*_test.js --require should -t 10000'
       }
     }
   });

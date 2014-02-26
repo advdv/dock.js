@@ -1,6 +1,7 @@
 /* global describe, it, beforeEach */
 var Docker = require('dockerode');
 var url = require('url');
+var winston = require('winston');
 var stubDockerode = require('./stubs/dockerode');
 var Container = require('../lib/container');
 var sinon = require('sinon');
@@ -33,6 +34,7 @@ describe('Container()', function(){
     con.should.have.property('started').and.equal(false);
     con.should.have.property('imageTag').and.equal('nginx');
     con.should.have.property('createConf').and.eql({Image: 'nginx'});
+    con.should.have.property('logger').and.be.instanceOf(winston.Logger);
 
     con = new Container(docker, 'nginx', conf1);
     con.should.have.property('createConf').and.equal(conf1);

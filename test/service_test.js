@@ -1,6 +1,7 @@
 /* global describe, it, beforeEach */
 var url = require('url');
 var stubDockerode = require('./stubs/dockerode');
+var winston = require('winston');
 
 var Docker = require('dockerode');
 var sinon = require('sinon');
@@ -23,15 +24,16 @@ describe('Service()', function(){
     var parts = url.parse('tcp://192.168.1.50:4342');
     
     docker = stubDockerode(new Docker({host: 'http://' + parts.hostname, port: parts.port}));
-    service = new Service(docker);
+    service = new Service(docker, 'test');
   });
 
   it('should construct as expected', function(){
-    var s = new Service(docker);
+    var s = new Service(docker, 'test2');
 
     s.should.have.property('instantiate').and.be.instanceOf(Function);
     s.should.have.property('container').and.be.instanceOf(Function);
     s.should.have.property('add').and.be.instanceOf(Function);
+    s.should.have.property('logger').and.be.instanceOf(winston.Logger);
 
     s.should.have.property('configurationFn').and.be.instanceOf(Function);
     s.should.have.property('instantiated').and.equal(false);
@@ -42,7 +44,7 @@ describe('Service()', function(){
     var dep2 = {};
     var dep = function(){ return dep2; };
     var dep1 = {};
-    var s2 = new Service(docker, [dep1, dep], 'stepshape/nginx:latest');
+    var s2 = new Service(docker, 'test3', [dep1, dep], 'stepshape/nginx:latest');
     s2.containers.length.should.equal(1);
 
     s2.dependencies[0].should.equal(dep1);
@@ -75,6 +77,7 @@ describe('Service()', function(){
 
       var s = service.container('stepshape/nginx');
       service.containers[0].should.be.an.instanceOf(Container);
+      service.containers[0].should.have.property('logger').and.equal(s.logger);
       s.should.equal(service);
 
     });
@@ -83,7 +86,7 @@ describe('Service()', function(){
   describe('.create()', function(){
     it('should create its dependencies first', function(done){
 
-      var dep1 = new Service(docker);
+      var dep1 = new Service(docker, 'test4');
       sinon.spy(dep1, 'instantiate');
 
       var c1 = new Container(docker, 'nginx');
@@ -160,7 +163,7 @@ describe('Service()', function(){
 
       it('should use configurationFn', function(done){
           
-        var dep1 = new Service(docker);
+        var dep1 = new Service(docker, 'test5');
         var fn = function(con, d1){
           con.should.be.instanceOf(Container);
           d1.should.equal(dep1);
@@ -189,7 +192,7 @@ describe('Service()', function(){
 
       it('should start dependencies first', function(done){
         
-        var dep1 = new Service(docker);
+        var dep1 = new Service(docker, 'test6');
         sinon.spy(dep1, 'start');
 
         var c1 = new Container(docker, 'nginx');
@@ -218,10 +221,10 @@ describe('Service()', function(){
 
 
     it('should create/start correctly in complicated examples', function(done){
-      var conf = new Service(docker, [], 'busybox:latest');
-      var src = new Service(docker, [], 'busybox:latest');
+      var conf = new Service(docker, 'conf', [], 'busybox:latest');
+      var src = new Service(docker, 'src', [], 'busybox:latest');
 
-      var php = new Service(docker, [conf, src])
+      var php = new Service(docker, 'php', [conf, src])
                       .container('stepshape/phpfpm:latest')
                       .container('stepshape/phpfpm:latest')
                       .container('stepshape/phpfpm:latest')
@@ -239,7 +242,7 @@ describe('Service()', function(){
                         };
                       });
 
-      var http = new Service(docker, [php, conf, src], 'stepshape/nginx:latest');
+      var http = new Service(docker, 'http', [php, conf, src], 'stepshape/nginx:latest');
 
       http.instantiate().then(function(){
         //everything build with id
