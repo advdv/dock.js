@@ -24,7 +24,6 @@ describe('Container()', function(){
   });
 
   it('should construct as expected', function(){
-    var conf1 = {};
 
     var con = new Container(docker, 'nginx');
     con.should.have.property('docker').and.equal(docker);
@@ -33,12 +32,7 @@ describe('Container()', function(){
     con.should.have.property('created').and.equal(false);
     con.should.have.property('started').and.equal(false);
     con.should.have.property('imageTag').and.equal('nginx');
-    con.should.have.property('createConf').and.eql({Image: 'nginx'});
     con.should.have.property('logger').and.be.instanceOf(winston.Logger);
-
-    con = new Container(docker, 'nginx', conf1);
-    con.should.have.property('createConf').and.equal(conf1);
-    conf1.should.eql({Image: 'nginx'});
 
   });
 
@@ -49,10 +43,15 @@ describe('Container()', function(){
     });
 
     it('should create container', function(done){
-      var p = container.create();
+      var conf = {};
+      var p = container.create(conf);
       p.should.be.instanceOf(Promise);
 
       p.then(function(containerId){
+        
+        docker.createContainer.calledOnce.should.equal(true);
+        docker.createContainer.calledWith(conf).should.equal(true);
+
         containerId.should.be.instanceOf(String);
         container.id.should.equal(containerId);
 
@@ -72,19 +71,23 @@ describe('Container()', function(){
     });
 
     it('should return promise and call create itself', function(done){
-      sinon.spy(container, 'create');
+      var createConf = {};
+      var startConf = {};
 
-      container.create();
-      var p = container.start();
+      sinon.spy(container, 'create');
+      var p = container.start(createConf, startConf);
 
       p.then(function(info){
+
+        docker.createContainer.calledWith(createConf).should.equal(true);
+        docker.startContainer.calledWith(startConf).should.equal(true);
 
         //return low level info
         container.info.should.not.equal(false);
         info.should.have.property('NetworkSettings');
 
         //create is called twice, create container once
-        container.create.calledTwice.should.equal(true);
+        container.create.calledOnce.should.equal(true);
         docker.createContainer.calledOnce.should.equal(true);
         docker.getContainer.calledOnce.should.equal(true);
         done();

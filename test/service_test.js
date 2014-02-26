@@ -130,12 +130,24 @@ describe('Service()', function(){
 
     describe('.start()', function(){
       it('should return promise', function(){
+        service.container('test');
+
         var p = service.start();
         p.should.be.instanceOf(Promise);
 
         var p2 = service.start();
         p2.should.equal(p);
       });
+
+      it('should throw without any container', function(done){
+
+        service.start().catch(function(err){
+          err.message.match(/without containers/).should.not.equal(null);
+          done();
+        });
+
+      });
+
 
       it('should throw on invalid configurationFn', function(done){
         
@@ -158,12 +170,14 @@ describe('Service()', function(){
           done();
         });
 
-
       });
 
       it('should use configurationFn', function(done){
           
         var dep1 = new Service(docker, 'test5');
+        dep1.container('busybox'); //needs at least one container
+
+        var createConf = {};
         var fn = function(con, d1){
           con.should.be.instanceOf(Container);
           d1.should.equal(dep1);
@@ -171,9 +185,7 @@ describe('Service()', function(){
           con.id.should.equal(false); //not yet created
           con.info.should.equal(false); //not yet started
 
-          return {
-            //valid
-          };
+          return createConf;
         };
 
         service.configurationFn = fn;
@@ -184,6 +196,8 @@ describe('Service()', function(){
         service.requires(dep1);
 
         service.start().then(function(){
+
+          docker.createContainer.calledWith(createConf).should.equal(true);
           service.configurationFn.calledOnce.should.equal(true);
           done();
         });
@@ -193,6 +207,7 @@ describe('Service()', function(){
       it('should start dependencies first', function(done){
         
         var dep1 = new Service(docker, 'test6');
+        dep1.container('busybox'); //needs at least one container
         sinon.spy(dep1, 'start');
 
         var c1 = new Container(docker, 'nginx');
@@ -212,7 +227,7 @@ describe('Service()', function(){
           c1.start.calledOnce.should.equal(true);
           c2.start.calledOnce.should.equal(true);
 
-          docker.startContainer.calledTwice.should.equal(true);
+          docker.startContainer.callCount.should.equal(3);
           done();
         });
 
