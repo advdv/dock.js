@@ -4,6 +4,7 @@ var url = require('url');
 var winston = require('winston');
 var stubDockerode = require('./stubs/dockerode');
 var Container = require('../lib/container');
+var Configuration = require('../lib/configuration');
 var sinon = require('sinon');
 
 //promise should always throw
@@ -33,6 +34,7 @@ describe('Container()', function(){
     con.should.have.property('started').and.equal(false);
     con.should.have.property('imageTag').and.equal('nginx');
     con.should.have.property('logger').and.be.instanceOf(winston.Logger);
+    con.should.have.property('configuration').and.be.instanceOf(Configuration);
 
   });
 

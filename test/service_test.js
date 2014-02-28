@@ -8,6 +8,7 @@ var sinon = require('sinon');
 
 var Service = require('../lib/service');
 var Container = require('../lib/container');
+var Configuration = require('../lib/configuration');
 
 //promise should always throw
 var Promise = require('bluebird');
@@ -148,44 +149,19 @@ describe('Service()', function(){
 
       });
 
-
-      it('should throw on invalid configurationFn', function(done){
-        
-        var fn = function(){
-          //invalid because it returns nothing
-        };
-
-        service.configurationFn = fn;
-        sinon.spy(service, 'configurationFn');
-
-        var c1 = new Container(docker, 'nginx');
-        sinon.spy(c1, 'start');
-        service.add(c1);
-
-        service.start().catch(function(err){
-
-          err.message.match(/configuration function/).should.not.equal(null);
-          service.configurationFn.calledOnce.should.equal(true);
-
-          done();
-        });
-
-      });
-
       it('should use configurationFn', function(done){
           
         var dep1 = new Service(docker, 'test5');
         dep1.container('busybox'); //needs at least one container
 
         var createConf = {};
-        var fn = function(con, d1){
-          con.should.be.instanceOf(Container);
+        var fn = function(conf, d1){
+          conf.should.be.instanceOf(Configuration);
           d1.should.equal(dep1);
           d1.started.isFulfilled().should.equal(true);
-          con.id.should.equal(false); //not yet created
-          con.info.should.equal(false); //not yet started
 
-          return createConf;
+          conf.creating = createConf;
+
         };
 
         service.configurationFn = fn;
@@ -243,8 +219,9 @@ describe('Service()', function(){
                       .container('stepshape/phpfpm:latest')
                       .container('stepshape/phpfpm:latest')
                       .container('stepshape/phpfpm:latest')
-                      .configure(function(con, c, s){
-                        con.should.be.instanceOf(Container);
+                      .configure(function(config, c, s){
+
+                        config.should.be.instanceOf(Configuration);
                         c.should.equal(conf);
                         c.containers[0].id.should.be.instanceOf(String);
                         c.containers[0].info.should.have.property("NetworkSettings");
@@ -252,9 +229,7 @@ describe('Service()', function(){
                         s.should.equal(src);
                         c.containers[0].id.should.be.instanceOf(String);
                         c.containers[0].info.should.have.property("NetworkSettings");
-                        return {
-                          //we can base configuration on the 
-                        };
+
                       });
 
       var http = new Service(docker, 'http', [php, conf, src], 'stepshape/nginx:latest');
