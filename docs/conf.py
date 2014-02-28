@@ -43,7 +43,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'dock.js'
+project = u'Dock.js'
 copyright = u'2014, Ad van der Veer'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -143,7 +143,7 @@ html_static_path = ['_static']
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-#html_sidebars = {}
+#html_sidebars = {'sidebar': ['index']}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -196,7 +196,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'dockjs.tex', u'dock.js Documentation',
+  ('index', 'dockjs.tex', u'Dock.js Documentation',
    u'Ad van der Veer', 'manual'),
 ]
 
