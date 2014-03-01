@@ -76,8 +76,10 @@ describe('Service()', function(){
   describe('.container()', function(){
     it('should add containers correctly', function(){
 
-      var s = service.container('stepshape/nginx');
+      var createConf = {};
+      var s = service.container('stepshape/nginx', createConf);
       service.containers[0].should.be.an.instanceOf(Container);
+      service.containers[0].configuration.creating.should.equal(createConf);
       service.containers[0].should.have.property('logger').and.equal(s.logger);
       s.should.equal(service);
 

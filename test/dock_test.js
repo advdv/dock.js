@@ -76,7 +76,7 @@ describe('Dock()', function(){
       var s1 = dock.service('phpfpm');
       var s2 = dock.service('nginx', ['phpfpm']);
       var s3 = dock.service('data', ['bogus']);
-      var s4 = dock.service('src', [], 'busybox:latest'); //shorthand
+      var s4 = dock.service('src', [], 'busybox:latest', {Cmd: 'ls'}); //shorthand
 
       s2.should.be.an.instanceOf(Service);
       s2.dependencies.length.should.equal(1);
@@ -89,6 +89,7 @@ describe('Dock()', function(){
       s4.should.be.an.instanceOf(Service);
       s4.containers.length.should.equal(1);
       s4.containers[0].imageTag.should.equal('busybox:latest');
+      s4.containers[0].configuration.creating.should.eql({Cmd: 'ls'});
 
       (function(){
         s3.start();

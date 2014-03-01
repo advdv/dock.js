@@ -2,10 +2,12 @@
 var Docker = require('dockerode');
 var url = require('url');
 var winston = require('winston');
+var sinon = require('sinon');
+
 var stubDockerode = require('./stubs/dockerode');
 var Container = require('../lib/container');
 var Configuration = require('../lib/configuration');
-var sinon = require('sinon');
+var errors = require('../lib/errors');
 
 //promise should always throw
 var Promise = require('bluebird');
@@ -42,6 +44,17 @@ describe('Container()', function(){
     var container;
     beforeEach(function(){
       container = new Container(docker, 'phpfpm');
+    });
+
+    it('should handle create fails', function(done){
+      
+      var conf = {errorMe: true};
+      var p = container.create(conf);
+
+      p.catch(errors.ClientError, function(){
+        done();
+      });
+
     });
 
     it('should create container', function(done){

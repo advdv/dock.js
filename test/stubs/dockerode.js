@@ -8,6 +8,10 @@ module.exports =function stubDockerode(docker) {
   //createContainer
   sinon.stub(docker, "createContainer", function(conf, cb){
     setTimeout(function(){
+      if(conf.errorMe === true) {
+        cb(new Error('deliberate fail'));
+      }
+
       cb(false, {id: crypto.randomBytes(20).toString('hex')});
     }, Math.floor((Math.random()*20)+1));
   });
