@@ -1,6 +1,7 @@
-/* global setTimeout */
+/* global setTimeout, Buffer */
 var sinon = require('sinon');
 var crypto = require('crypto');
+var Readable = require('stream').Readable;
 
 module.exports =function stubDockerode(docker) {
   'use strict';
@@ -14,6 +15,23 @@ module.exports =function stubDockerode(docker) {
 
       cb(false, {id: crypto.randomBytes(20).toString('hex')});
     }, Math.floor((Math.random()*20)+1));
+  });
+
+
+  sinon.stub(docker, 'buildImage', function(file, conf, cb){
+    setTimeout(function(){
+      var stream = new Readable();
+
+      if(conf.t === 'failMe') {
+        stream.push(new Buffer(JSON.stringify({error: 'test error'})));
+      } else {
+        stream.push(new Buffer('{"stream":"Successfully built 3d65aee0eaea"}'));  
+      }
+      
+      stream.push(null);
+
+      cb(false, stream);
+    },Math.floor((Math.random()*20)+1));
   });
 
   docker.startContainer = function(){};

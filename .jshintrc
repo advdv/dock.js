@@ -1,7 +1,8 @@
 {
 	"predef"		: [
 		"require",
-		"module"
+		"module",
+		"__dirname"
 	],
 	"unused" 		: true,
 	"undef": true,
