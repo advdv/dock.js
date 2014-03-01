@@ -1,6 +1,6 @@
 {
   "name": "dock.js",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "An easy to use Node.js module that orchestrates Docker containers that handles interdependencies for you.",
   "main": "index.js",
   "scripts": {
@@ -17,7 +17,8 @@
     "bluebird": "~1.0.5",
     "args-js": "~0.10.4",
     "winston": "~0.7.2",
-    "archiver": "~0.6.1"
+    "archiver": "~0.6.1",
+    "temp": "~0.7.0"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
