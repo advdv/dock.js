@@ -32,7 +32,8 @@ describe('Dock()', function(){
     c.should.have.property('get').and.be.instanceOf(Function);
     c.should.have.property('has').and.be.instanceOf(Function);
     c.should.have.property('add').and.be.instanceOf(Function);
-
+    
+    c.should.have.property('images').and.be.instanceOf(Array);
     c.should.have.property('docker').and.equal(docker);
 
     //test logger
@@ -94,6 +95,53 @@ describe('Dock()', function(){
       (function(){
         s3.start();
       }).should.throw(/Could not retrieve service/);
+    });
+  });
+
+
+  describe('.image()', function(){
+    it('should create images sucessfully', function(){
+      var d = new Dock(docker);
+      var c = {};
+      var res = d.image('sandbox', __dirname + '/docker', c);
+
+      res.should.equal(d);
+      res.images.length.should.equal(1);
+      res.images[0].buildConf.should.equal(c);
+    });
+
+    it('shoud throw on double insert of image with the same tag', function(){
+
+      dock.image('sandbox', __dirname + '/docker');
+
+      (function(){
+        dock.image('sandbox', __dirname + '/docker');
+      }).should.throw(/already exists/);
+
+    });
+  });
+
+  describe('.build()', function(){
+    it('should build all images', function(done){
+      
+      var memTrans = new winston.transports.Memory();
+      var d = new Dock(docker);
+      
+      d.logger.add(memTrans, {}, true);
+      d.image('busybox:latest', __dirname + '/fixtures/docker');
+      d.image('busybox:0.0.1', __dirname + '/fixtures/docker');
+
+      d.build().then(function(res){
+        res.should.eql([ '3d65aee0eaea', '3d65aee0eaea' ]);
+        var o = memTrans.writeOutput;
+
+        //test logs to is build happen concurrently
+        o.indexOf('info: [busybox:0.0.1] starting build....').should.be.greaterThan(o.indexOf('info: [busybox:latest] starting build....'));
+        o.indexOf('info: [busybox:0.0.1] starting build....').should.be.lessThan(o.indexOf('info: [busybox:latest] build complete! (3d65aee0eaea)'));
+
+        done();
+      });
+
     });
   });
 
@@ -230,20 +278,6 @@ describe('Dock()', function(){
         done();
       });
     });
-
-    // it('should handle circular dependencies', function(done){
-
-    //   // console.log('\n');
-    //   d.logger.add(winston.transports.Console, {colorize: true});     
-
-    //   //create circular dependency
-    //   d.service('src', ['data']).container('busybox:latest');
-
-
-            
-    //   done();
-    // });
-
 
   });
 
