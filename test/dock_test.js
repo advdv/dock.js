@@ -224,10 +224,17 @@ describe('Dock()', function(){
 
     it('should start completely with .start()', function(done){
       var p = d.start();
-      p.should.be.instanceOf(Promise);
 
-      p.then(function(){
+      p.should.be.instanceOf(Promise);
+      p.then(function(infos){
                     
+        //returns info of the root services
+        infos.length.should.equal(2);
+
+        //only returns info on its own container
+        infos[0].length.should.equal(1);
+        infos[0][0].should.have.property('NetworkSettings');
+
         //test started order
         var o = memTrans.writeOutput;
 

@@ -175,6 +175,10 @@ describe('Service()', function(){
 
         service.start().then(function(){
 
+          arguments[0].should.be.instanceOf(Array);
+          arguments[0].length.should.equal(1);
+          arguments[0][0].should.equal(c1.info);
+
           docker.createContainer.calledWith(createConf).should.equal(true);
           service.configurationFn.calledOnce.should.equal(true);
           done();
