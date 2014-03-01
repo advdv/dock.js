@@ -31,9 +31,7 @@ describe('Container()', function(){
     
     img.should.have.property('archiver');
     img.should.have.property('options');
-    img.should.have.property('buildConf').and.eql({
-      t: 'sandbox:latest'
-    });
+    img.should.have.property('buildConf').and.eql({});
     img.should.have.property('logger').and.be.instanceOf(winston.Logger);
     img.should.have.property('tarred').and.equal(false);
     img.should.have.property('built').and.equal(false);
@@ -83,9 +81,7 @@ describe('Container()', function(){
       p.should.be.instanceOf(Promise);
       img.built.should.equal(p);
       img.build().should.equal(p);
-      img.buildConf.should.eql({
-        t: 'sandbox:latest'
-      });
+      img.buildConf.should.eql(conf);
 
       p.then(function(imageId){
 
