@@ -11,6 +11,10 @@ module.exports = function(grunt){
         files: ['index.js', 'lib/*.js', 'test/*_test.js', 'test/stubs/*.js'],
         tasks: ['shell:unitTests'],
       },
+      docs: {
+        files: ['docs/conf.py', 'docs/**/*.rst', 'docs/*.rst'],
+        tasks: ['shell:sphinx'],
+      }
     },
 
     shell: {
@@ -20,11 +24,18 @@ module.exports = function(grunt){
           stderr: true
         },
         command: './node_modules/.bin/mocha ./test/*_test.js --require should -t 10000'
+      },
+      sphinx: {
+        options: {
+          stdout: true,
+          stderr: true
+        },
+        command: 'make -C ./docs html'
       }
     }
   });
 
-  grunt.registerTask('start', ['watch:unitTests']);
+  grunt.registerTask('start', ['watch']);
   grunt.registerTask('default', ['start']);
   grunt.registerTask('test', ['shell:unitTests']);
 
