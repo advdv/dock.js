@@ -42,9 +42,9 @@ describe('Service()', function(){
     s.should.have.property('docker').and.equal(docker);
     s.should.have.property('containers').and.eql([]);
 
-    var dep2 = {};
+    var dep2 = new Service(docker, 'test44');
     var dep = function(){ return dep2; };
-    var dep1 = {};
+    var dep1 = new Service(docker, 'test55');
     var s2 = new Service(docker, 'test3', [dep1, dep], 'stepshape/nginx:latest');
     s2.containers.length.should.equal(1);
 
@@ -53,9 +53,18 @@ describe('Service()', function(){
   });
 
   describe('.requires()', function(){
+    it('should throw on non service as dep', function(){
+      var dep = 'a';
+
+      (function(){
+        service.requires(dep);
+      }).should.throw();
+
+    });
+
     it('should add an dependency', function(){
 
-      var dep1 = {};
+      var dep1 = new Service(docker, 'test3', [], 'stepshape/nginx:latest');
       var s = service.requires(dep1);
       s.should.equal(service);
       service.requires(function(){ return dep1; });

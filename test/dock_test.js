@@ -136,7 +136,8 @@ describe('Dock()', function(){
         var o = memTrans.writeOutput;
 
         //test logs to is build happen concurrently
-        o.indexOf('info: [busybox:0.0.1] starting build....').should.be.greaterThan(o.indexOf('info: [busybox:latest] starting build....'));
+
+        o.indexOf('info: [busybox:0.0.1] starting build....').should.be.greaterThan(o.indexOf('info: [busybox:0.0.1] tarring context....'));
         o.indexOf('info: [busybox:0.0.1] starting build....').should.be.lessThan(o.indexOf('info: [busybox:latest] build complete! (3d65aee0eaea)'));
 
         done();
