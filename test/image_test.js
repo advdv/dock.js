@@ -3,6 +3,7 @@ var Docker = require('dockerode');
 var url = require('url');
 var fs = require('fs');
 var winston = require('winston');
+var sinon = require('sinon');
 
 var stubDockerode = require('./stubs/dockerode');
 var Image = require('../lib/image');
@@ -36,6 +37,11 @@ describe('Container()', function(){
     img.should.have.property('tarred').and.equal(false);
     img.should.have.property('built').and.equal(false);
     img.should.have.property('imageTag').and.equal('sandbox:latest');
+
+    var img1 = new Image(docker, './', 'test');
+    var img2 = new Image({docker: docker, contextDir: __dirname + '/./fixtures/docker', imageTag: 'sandbox:latest', from: img1 });
+    img2.from.should.equal(img1);
+
   });
 
   describe('.tar()', function(){
@@ -72,11 +78,31 @@ describe('Container()', function(){
   });
 
 
+  describe('.extend', function(){
+
+    it('should normalize to function', function(){
+
+      var img1 = new Image(docker, __dirname + '/fixtures/docker', 'test:0.1');
+      var img2 = new Image(docker, __dirname + '/fixtures/docker', 'test:0.1');
+
+      (function(){
+        img1.extend('a');
+      }).should.throw(/Expected Image instance/);
+      
+      var fn = function(){ return 'a';};
+      img1.extend(fn);
+      img1.from.should.equal('a');
+
+      img1.extend(img2);
+      img1.from.should.equal(img2);
+    });
+
+  });
+
   describe('.build()', function(){
     it('should build correctly', function(done){
-
       var conf = {};
-      var img = new Image(docker, __dirname + '/fixtures/docker', 'sandbox:latest', conf);
+      var img = new Image({docker: docker, contextDir: __dirname + '/fixtures/docker', imageTag: 'sandbox:latest', buildConf: conf });
       var p = img.build();
       p.should.be.instanceOf(Promise);
       img.built.should.equal(p);
@@ -84,7 +110,6 @@ describe('Container()', function(){
       img.buildConf.should.eql(conf);
 
       p.then(function(imageId){
-
         fs.existsSync(img.tarFile).should.equal(false);
         imageId.should.equal('3d65aee0eaea');
 
@@ -92,11 +117,9 @@ describe('Container()', function(){
         docker.buildImage.getCall(0).args[1].should.equal(conf);
         done();
       });
-
     });
 
     it('should correctly fail on built fail', function(done){
-
       var img = new Image(docker, __dirname + '/fixtures/docker', 'failMe');
       var p = img.build();
       p.should.be.instanceOf(Promise);
@@ -107,8 +130,30 @@ describe('Container()', function(){
         err.message.should.equal('test error');
         done();
       });
+    });
+
+    it('it should build dependencies first when it is also specified', function(done){
+
+      //img2 is dependendant on test:0.1 image          
+      var img1 = new Image(docker, __dirname + '/fixtures/docker', 'test:0.1');
+      sinon.spy(img1, 'tar');
+      sinon.spy(img1, 'build');
+
+      var img2 = new Image({docker: docker, contextDir: __dirname + '/fixtures/dependency', imageTag: 'sandbox:latest', from: img1});
+      sinon.spy(img2, 'tar');
+
+      //calling twice doen't occur overhead
+      img2.build().then(img2.build).then(function(){
+
+        //test if called after each other
+        img1.build.calledOnce.should.equal(true);
+        img1.tar.calledBefore(img2.tar).should.equal(true);
+
+        done();        
+      });
 
     });
+
 
   });
 
