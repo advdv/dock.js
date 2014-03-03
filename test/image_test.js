@@ -30,7 +30,6 @@ describe('Image()', function(){
     
     img.contextDir.should.equal(__dirname + '/fixtures/docker');
     
-    img.should.have.property('archiver');
     img.should.have.property('options');
     img.should.have.property('buildConf').and.eql({});
     img.should.have.property('logger').and.be.instanceOf(winston.Logger);
