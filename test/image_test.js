@@ -15,7 +15,7 @@ Promise.onPossiblyUnhandledRejection(function(error){
     throw error;
   });
 
-describe('Container()', function(){
+describe('Image()', function(){
   'use strict';
 
   var docker;
@@ -25,7 +25,7 @@ describe('Container()', function(){
 
   });
 
-  it('should construct correctly', function(){
+  it('should construct correctly', function(done){
     var img = new Image(docker, __dirname + '/./fixtures/docker', 'sandbox:latest');
     
     img.contextDir.should.equal(__dirname + '/fixtures/docker');
@@ -40,7 +40,10 @@ describe('Container()', function(){
 
     var img1 = new Image(docker, './', 'test');
     var img2 = new Image({docker: docker, contextDir: __dirname + '/./fixtures/docker', imageTag: 'sandbox:latest', from: img1 });
-    img2.from.should.equal(img1);
+    img2.from.then(function(f){
+      f().should.equal(img1);
+      done();
+    });
 
   });
 
@@ -91,10 +94,13 @@ describe('Container()', function(){
       
       var fn = function(){ return 'a';};
       img1.extend(fn);
-      img1.from.should.equal('a');
+      img1.from.should.be.instanceOf(Promise);
+
+
+      // img1.from.should.equal('a');
 
       img1.extend(img2);
-      img1.from.should.equal(img2);
+      // img1.from.should.equal(img2);
     });
 
   });

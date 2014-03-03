@@ -13,6 +13,7 @@ Promise.onPossiblyUnhandledRejection(function(error){
 
 var Dock = require('../lib/dock');
 var Service = require('../lib/service');
+var Repository = require('../lib/repository');
 
 describe('Dock()', function(){
   'use strict';
@@ -33,7 +34,7 @@ describe('Dock()', function(){
     c.should.have.property('has').and.be.instanceOf(Function);
     c.should.have.property('add').and.be.instanceOf(Function);
     
-    c.should.have.property('images').and.be.instanceOf(Array);
+    c.should.have.property('repository').and.be.instanceOf(Repository);
     c.should.have.property('docker').and.equal(docker);
 
     //test logger
@@ -100,52 +101,21 @@ describe('Dock()', function(){
 
 
   describe('.image()', function(){
-    it('should create images sucessfully', function(){
+    it('should create images sucessfully', function(done){
       var d = new Dock(docker);
       var c = {};
-      var res = d.image('sandbox', __dirname + '/docker', c);
+      var res = d.image('sandbox', __dirname + '/bogus', c);
+      res.should.equal(d);    
+      res.repository.images.length.should.equal(1);
+      res.repository.images[0].buildConf.should.equal(c);
 
-      res.should.equal(d);
-      res.images.length.should.equal(1);
-      res.images[0].buildConf.should.equal(c);
-    });
-
-    it('shoud throw on double insert of image with the same tag', function(){
-
-      dock.image('sandbox', __dirname + '/docker');
-
-      (function(){
-        dock.image('sandbox', __dirname + '/docker');
-      }).should.throw(/already exists/);
-
-    });
-  });
-
-  describe('.build()', function(){
-    it('should build all images', function(done){
-      
-      var memTrans = new winston.transports.Memory();
-      var d = new Dock(docker);
-      
-      d.logger.add(memTrans, {}, true);
-      d.image('busybox:latest', __dirname + '/fixtures/docker');
-      d.image('busybox:0.0.1', __dirname + '/fixtures/docker');
-
-      d.build().then(function(res){
-        res.should.eql([ '3d65aee0eaea', '3d65aee0eaea' ]);
-        var o = memTrans.writeOutput;
-
-        //test logs to is build happen concurrently
-
-        o.indexOf('info: [busybox:0.0.1] starting build....').should.be.greaterThan(o.indexOf('info: [busybox:0.0.1] tarring context....'));
-        o.indexOf('info: [busybox:0.0.1] starting build....').should.be.lessThan(o.indexOf('info: [busybox:latest] build complete! (3d65aee0eaea)'));
-
+      res.repository.images[0].from.catch(function(){
+        //it shoiuld have trown because of bogus path
         done();
       });
-
     });
-  });
 
+  });
 
   describe('.analyse()', function(){
     
@@ -212,6 +182,7 @@ describe('Dock()', function(){
                   
         //test started order
         var o = memTrans.writeOutput;
+
         (o.indexOf('info: [src] started!')).should.be.lessThan(o.indexOf('info: [php] started!'));
         (o.indexOf('info: [php] started!')).should.be.lessThan(o.indexOf('info: [data] started!'));
         (o.indexOf('info: [php] started!')).should.be.lessThan(o.indexOf('info: [http] started!'));
