@@ -1,3 +1,4 @@
+
 /* global setTimeout, Buffer */
 var sinon = require('sinon');
 var crypto = require('crypto');
@@ -24,6 +25,10 @@ module.exports =function stubDockerode(docker) {
 
       if(conf.t === 'failMe') {
         stream.push(new Buffer(JSON.stringify({error: 'test error'})));
+      } else if(conf.t === 'statusMe') {
+        stream.push(new Buffer(JSON.stringify({status: 'Pulling repository stackbrew/ubuntu'})));
+      } else if(conf.t === 'downloadMe') {
+        stream.push(new Buffer(JSON.stringify({status: 'Downloading'})));
       } else {
         stream.push(new Buffer('{"stream":"Successfully built 3d65aee0eaea"}'));  
       }

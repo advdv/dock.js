@@ -123,6 +123,36 @@ describe('Image()', function(){
         done();
       });
     });
+    
+    it('should correctly show status', function(done){
+      var img = new Image(docker, __dirname + '/fixtures/docker', 'statusMe');
+      var memTrans = new winston.transports.Memory();
+      img.logger.add(memTrans, {}, true);
+
+      //it fails but should have logged the status
+      img.build().catch(function(err){
+        err.message.should.equal('Could not retrieve image id from build');
+        memTrans.writeOutput.join(' ').indexOf('Pulling repository stackbrew/ubuntu').should.not.equal(-1);
+
+        done();
+      });
+    });
+
+    it('should correctly show downloading status', function(done){
+      var img = new Image(docker, __dirname + '/fixtures/docker', 'downloadMe');
+      var memTrans = new winston.transports.Memory();
+      img.logger.add(memTrans, {}, true);
+
+      //it fails but should have logged the status
+      img.build().catch(function(err){
+        err.message.should.equal('Could not retrieve image id from build');
+
+        //should filter downloading spam
+        memTrans.writeOutput.join(' ').indexOf('Downloading').should.equal(-1);
+        done();
+      });
+    });
+
 
     it('should correctly fail on built fail', function(done){
       var img = new Image(docker, __dirname + '/fixtures/docker', 'failMe');
