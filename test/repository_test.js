@@ -47,6 +47,14 @@ describe('Repository()', function(){
       rep.has('image:tag').should.equal(true);
       rep.has('bogus').should.equal(false);
 
+      //normalize to 'latest'
+      var img2 = new Image(docker, '.', 'image');
+      rep.add(img2);      
+
+      rep.get('image:latest').should.equal(img2);
+      rep.has('image:latest').should.equal(true);
+      rep.get('image').should.equal(img2);
+      rep.has('image').should.equal(true);
     });
 
     it('should .add() correctly', function(){
@@ -63,6 +71,7 @@ describe('Repository()', function(){
         rep.add(img2);
       }).should.throw(/already exists/);
     });
+
   });
 
   describe('create()', function(){
@@ -92,10 +101,7 @@ describe('Repository()', function(){
 
 
   describe('build()', function(){
-    
-
     it('should build all images', function(done){
-      
       var memTrans = new winston.transports.Memory();
       rep.logger.add(memTrans, {}, true);
 
@@ -106,11 +112,11 @@ describe('Repository()', function(){
       rep.build().then(function(){        
         var o = memTrans.writeOutput;
 
+
         //tarring of the image should only start when its dependency completed
-        (o.indexOf('info: [test] cleanup done!')).should.be.lessThan(o.indexOf('info: [sandbox] tarring context....'));
+        (o.indexOf('info: [test:latest] cleanup done!')).should.be.lessThan(o.indexOf('info: [sandbox:latest] tarring context....'));
         done();
       });
-
     });
 
   });

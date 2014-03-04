@@ -46,6 +46,16 @@ describe('Image()', function(){
 
   });
 
+  it('should .normalizeTag() correctly', function(){
+
+    Image.normalizeTag('user/rep:12.3').should.equal('user/rep:12.3');
+    Image.normalizeTag('user/rep:').should.equal('user/rep:latest');    
+    Image.normalizeTag('user/rep').should.equal('user/rep:latest');    
+    Image.normalizeTag('user/rep:huh:huh').should.equal('user/rep:huh:huh');    
+
+  });
+
+
   describe('.tar()', function(){
     it('should throw if the context dir doesnt exist', function(done){
       var img = new Image(docker, __dirname + '/fixtures/bogus', 'sandbox:latest');
@@ -168,7 +178,6 @@ describe('Image()', function(){
     });
 
     it('it should build dependencies first when it is also specified', function(done){
-
       //img2 is dependendant on test:0.1 image          
       var img1 = new Image(docker, __dirname + '/fixtures/docker', 'test:0.1');
       sinon.spy(img1, 'tar');
@@ -186,9 +195,7 @@ describe('Image()', function(){
 
         done();        
       });
-
     });
-
 
   });
 

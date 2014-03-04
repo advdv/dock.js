@@ -28,7 +28,6 @@ Todos
 ------
 This library is still in early development
 
-- 	Fix image dependency (tagged and untagged)
 -   Stopping services
 -   Complete documentation (obviously)
 

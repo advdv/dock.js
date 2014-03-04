@@ -23,11 +23,11 @@ module.exports =function stubDockerode(docker) {
     setTimeout(function(){
       var stream = new Readable();
 
-      if(conf.t === 'failMe') {
+      if(conf.t === 'failMe:latest') {
         stream.push(new Buffer(JSON.stringify({error: 'test error'})));
-      } else if(conf.t === 'statusMe') {
+      } else if(conf.t === 'statusMe:latest') {
         stream.push(new Buffer(JSON.stringify({status: 'Pulling repository stackbrew/ubuntu'})));
-      } else if(conf.t === 'downloadMe') {
+      } else if(conf.t === 'downloadMe:latest') {
         stream.push(new Buffer(JSON.stringify({status: 'Downloading'})));
       } else {
         stream.push(new Buffer('{"stream":"Successfully built 3d65aee0eaea"}'));  
