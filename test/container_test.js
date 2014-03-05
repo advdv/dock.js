@@ -193,6 +193,17 @@ describe('Container()', function(){
 
     });
 
+    it('should pipe output correctly  to func', function(done){     
+      var fn = function(stream) {
+        
+        stream.on.should.instanceOf(Function);
+        done();
+      };
+
+      container.pipe(fn);
+      container.attach();
+    });
+
     it('should pipe output correctly', function(done){      
       (function(){
         container.pipe('a');
