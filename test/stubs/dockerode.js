@@ -4,7 +4,9 @@ var sinon = require('sinon');
 var crypto = require('crypto');
 var Readable = require('stream').Readable;
 
-module.exports =function stubDockerode(docker) {
+var StubContainer = require('./dockerode_container.js');
+
+module.exports = function stubDockerode(docker) {
   'use strict';
 
   //createContainer
@@ -14,7 +16,7 @@ module.exports =function stubDockerode(docker) {
         cb(new Error('deliberate fail'));
       }
 
-      cb(false, {id: crypto.randomBytes(20).toString('hex')});
+      cb(false, new StubContainer(docker));
     }, Math.floor((Math.random()*20)+1));
   });
 
@@ -39,38 +41,21 @@ module.exports =function stubDockerode(docker) {
     },Math.floor((Math.random()*20)+1));
   });
 
+  // @todo move to stub container
   docker.startContainer = function(){};
-  docker.inspectContainer = function(){};
-
   sinon.stub(docker, 'startContainer', function(conf, cb){
     setTimeout(function(){
       cb();
     },Math.floor((Math.random()*20)+1));
   });
 
-
-  sinon.stub(docker, 'inspectContainer', function(cb){
-    setTimeout(function(){
-      cb(false, {
-        "NetworkSettings": {
-          "IpAddress": "",
-          "IpPrefixLen": 0,
-          "Gateway": "",
-          "Bridge": "",
-          "PortMapping": null
-        },
-      });
-    },Math.floor((Math.random()*20)+1));
-  });
-
-
   //getContainer
   sinon.stub(docker, "getContainer", function(id){
-    return {
-      id: id,
-      start: docker.startContainer,
-      inspect: docker.inspectContainer
-    };
+    var c = new StubContainer(id);
+
+    c.start = docker.startContainer;
+
+    return c;
   });
 
 

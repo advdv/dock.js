@@ -116,4 +116,35 @@ describe('Container()', function(){
 
   });
 
+
+  describe('.attach()', function(){
+    
+    var container;
+    beforeEach(function(){
+      container = new Container(docker, 'phpfpm');
+    });
+
+    it('should return promise and call create itself', function(done){      
+      var createConf = {};
+      var attachConf = {};
+
+      sinon.spy(container, 'create');
+      var p = container.attach(createConf, attachConf);
+
+      p.should.be.instanceOf(Promise);
+      p.then(function(stream){
+
+        stream.should.have.property('on').an.instanceOf(Function);
+
+        container.create.calledOnce.should.equal(true);
+        docker.createContainer.calledWith(createConf).should.equal(true);
+
+        done();
+      });
+
+    });
+
+  });
+
+
 });
