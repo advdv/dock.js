@@ -75,10 +75,13 @@ describe('Service()', function(){
 
   describe('.add()', function(){
     it('should add containers correctly', function(){
-      var c = {tag: 'phpfpm'};
+      var c = new Container(docker, 'nginx');
 
       service.add(c);
       service.containers.length.should.equal(1);
+
+      c.name.should.equal('test_0');
+
     });
   });
 

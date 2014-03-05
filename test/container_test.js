@@ -32,18 +32,23 @@ describe('Container()', function(){
     con.should.have.property('docker').and.equal(docker);
     con.should.have.property('id').and.equal(false);
     con.should.have.property('info').and.equal(false);
+    con.should.have.property('name').and.equal(false);
     con.should.have.property('created').and.equal(false);
     con.should.have.property('started').and.equal(false);
     con.should.have.property('imageTag').and.equal('nginx');
     con.should.have.property('logger').and.be.instanceOf(winston.Logger);
     con.should.have.property('configuration').and.be.instanceOf(Configuration);
 
+    con = new Container(docker, 'nginx', 'test');
+    con.should.have.property('name').and.equal('test');
+
   });
 
   describe('.create()', function(){
-    var container;
+    var container, container2;
     beforeEach(function(){
       container = new Container(docker, 'phpfpm');
+      container2 = new Container(docker, 'nginx', 'myhttp');
     });
 
     it('should handle create fails', function(done){
@@ -67,15 +72,31 @@ describe('Container()', function(){
         docker.createContainer.calledOnce.should.equal(true);
         docker.createContainer.calledWith(conf).should.equal(true);
 
+        //test if conf got overwritten
+        conf.Image.should.equal('phpfpm');
+
         containerId.should.be.instanceOf(String);
         container.id.should.equal(containerId);
 
         done();
       });
 
-      var p2 = container.create();
-      p2.should.equal(p);
     });
+
+    it('should create container with name', function(done){
+      var conf = {};
+      container2.create(conf).then(function(){
+
+        //test if conf got overwritten
+        conf.Image.should.equal('nginx');
+        conf.name.should.equal('myhttp');
+
+        done();
+      });
+
+    });
+
+
   });
 
   describe('.start()', function(){
