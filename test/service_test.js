@@ -1,4 +1,4 @@
-/* global describe, it, beforeEach */
+/* global describe, it, beforeEach, process */
 var url = require('url');
 var stubDockerode = require('./stubs/dockerode');
 var winston = require('winston');
@@ -35,12 +35,13 @@ describe('Service()', function(){
     s.should.have.property('container').and.be.instanceOf(Function);
     s.should.have.property('add').and.be.instanceOf(Function);
     s.should.have.property('logger').and.be.instanceOf(winston.Logger);
-
-    s.should.have.property('configurationFn').and.be.instanceOf(Function);
     s.should.have.property('instantiated').and.equal(false);
     s.should.have.property('started').and.equal(false);
     s.should.have.property('docker').and.equal(docker);
     s.should.have.property('containers').and.eql([]);
+
+    s.should.have.property('configurationFn').and.be.instanceOf(Function);
+    s.should.have.property('pipeFn').and.be.instanceOf(Function);
 
     var dep2 = new Service(docker, 'test44');
     var dep = function(){ return dep2; };
@@ -51,6 +52,29 @@ describe('Service()', function(){
     s2.dependencies[0].should.equal(dep1);
     s2.dependencies[1].should.equal(dep2);
   });
+
+  describe('access methods', function(){
+
+
+    it('get', function(){
+      var c1 = new Container(docker, 'nginx');
+      var c2 = new Container(docker, 'nginx', 'containerx');
+
+      service.add(c1)
+             .add(c2);
+
+      (function(){
+        service.get('bogus');
+      }).should.throw(/not retrieve container/);
+
+      service.get('test_0').should.equal(c1);
+      service.get('containerx').should.equal(c2);
+
+    });
+
+  });
+
+
 
   describe('.requires()', function(){
     it('should throw on non service as dep', function(){
@@ -143,6 +167,33 @@ describe('Service()', function(){
       });
     });
 
+
+    describe('.pipe()', function(){
+      it('should pipe first container by default', function(){
+        var c1 = new Container(docker, 'nginx');
+        service.pipe(process.stdout);
+        service.add(c1);
+
+        sinon.spy(c1, 'pipe');
+        service.pipeFn.apply(service);
+
+        c1.pipe.calledOnce.should.equal(true);
+        c1.configuration.attaching.stream.should.equal(true);
+      });
+
+      it('should pipe specific container', function(){
+        var c1 = new Container(docker, 'nginx', 'test');
+        service.pipe(process.stdout, 'test');
+        service.add(c1);
+
+        sinon.spy(c1, 'pipe');
+        service.pipeFn.apply(service);
+
+        c1.pipe.calledOnce.should.equal(true);
+        c1.configuration.attaching.stream.should.equal(true);
+      });
+    });
+
     describe('.start()', function(){
       it('should return promise', function(){
         service.container('test');
@@ -175,7 +226,7 @@ describe('Service()', function(){
           d1.started.isFulfilled().should.equal(true);
 
           conf.creating = createConf;
-
+          this.should.equal(service);
         };
 
         service.configurationFn = fn;
@@ -195,6 +246,25 @@ describe('Service()', function(){
           service.configurationFn.calledOnce.should.equal(true);
           done();
         });
+      });
+
+
+      it('should use pipeFn', function(done){
+        var c1 = new Container(docker, 'nginx');
+        var fn = function() {
+          this.should.equal(service);
+        };
+
+        service.add(c1);
+        service.pipeFn = fn;
+        sinon.spy(service, 'pipeFn');
+
+        service.start().then(function(){
+
+          service.pipeFn.calledOnce.should.equal(true);
+          done();
+        });
+
       });
 
 

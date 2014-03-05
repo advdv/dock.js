@@ -14,9 +14,8 @@ module.exports = function stubDockerodeContainer(id) {
   self.attach = function(conf, cb) {
 
     cb(false, {
-      on: function(){
-        
-      }
+      on: function(){},
+      pipe: function(){}
     });
   };
 

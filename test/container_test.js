@@ -1,4 +1,4 @@
-/* global describe, it, beforeEach */
+/* global describe, it, beforeEach, process */
 var Docker = require('dockerode');
 var url = require('url');
 var winston = require('winston');
@@ -51,10 +51,10 @@ describe('Container()', function(){
       container2 = new Container(docker, 'nginx', 'myhttp');
     });
 
-    it('should handle create fails', function(done){
-      
-      var conf = {errorMe: true};
-      var p = container.create(conf);
+    it('should handle create fails', function(done){      
+      container.configuration.creating = {errorMe: true};
+
+      var p = container.create();
 
       p.catch(errors.ClientError, function(){
         done();
@@ -64,7 +64,8 @@ describe('Container()', function(){
 
     it('should create container', function(done){
       var conf = {};
-      var p = container.create(conf);
+      container.configuration.creating = conf;
+      var p = container.create();
       p.should.be.instanceOf(Promise);
 
       p.then(function(containerId){
@@ -84,8 +85,9 @@ describe('Container()', function(){
     });
 
     it('should create container with name', function(done){
-      var conf = {};
-      container2.create(conf).then(function(){
+      var conf = {a: 'b'};
+      container2.configuration.creating = conf;
+      container2.create().then(function(){
 
         //test if conf got overwritten
         conf.Image.should.equal('nginx');
@@ -110,8 +112,12 @@ describe('Container()', function(){
       var createConf = {};
       var startConf = {};
 
+      container.configuration.creating = createConf;
+      container.configuration.starting = startConf;
+
       sinon.spy(container, 'create');
-      var p = container.start(createConf, startConf);
+      sinon.spy(container, 'attach');
+      var p = container.start();
 
       p.then(function(info){
 
@@ -126,6 +132,9 @@ describe('Container()', function(){
         container.create.calledOnce.should.equal(true);
         docker.createContainer.calledOnce.should.equal(true);
         docker.getContainer.calledOnce.should.equal(true);
+
+        //attach shouldn't be called
+        container.attach.calledOnce.should.equal(false);
         done();
       });
 
@@ -134,6 +143,22 @@ describe('Container()', function(){
       container.started.should.equal(p2);
 
     });
+
+    it('should also attach when configuration specifies so', function(done){
+
+      container.configuration.attaching.stream = true;
+
+      sinon.spy(container, 'create');
+      sinon.spy(container, 'attach');
+
+      container.start().then(function(){
+        container.create.calledOnce.should.equal(true);
+        container.attach.calledOnce.should.equal(true);
+        done();
+      });
+
+    });
+
 
   });
 
@@ -149,8 +174,11 @@ describe('Container()', function(){
       var createConf = {};
       var attachConf = {};
 
+      container.configuration.creating = createConf;
+      container.configuration.attaching = attachConf;
+
       sinon.spy(container, 'create');
-      var p = container.attach(createConf, attachConf);
+      var p = container.attach();
 
       p.should.be.instanceOf(Promise);
       p.then(function(stream){
@@ -163,6 +191,18 @@ describe('Container()', function(){
         done();
       });
 
+    });
+
+    it('should pipe output correctly', function(done){      
+      (function(){
+        container.pipe('a');
+      }).should.throw(/Argument/);
+
+      container.pipe(process.stdout);
+      container.attach().then(function(){
+
+        done();
+      });
     });
 
   });
