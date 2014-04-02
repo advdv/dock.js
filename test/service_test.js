@@ -6,6 +6,7 @@ var winston = require('winston');
 var Docker = require('dockerode');
 var sinon = require('sinon');
 
+var Processes = require('../lib/processes');
 var Service = require('../lib/service');
 var Container = require('../lib/container');
 var Configuration = require('../lib/configuration');
@@ -35,6 +36,7 @@ describe('Service()', function(){
     s.should.have.property('container').and.be.instanceOf(Function);
     s.should.have.property('add').and.be.instanceOf(Function);
     s.should.have.property('logger').and.be.instanceOf(winston.Logger);
+    s.should.have.property('processes').and.be.instanceOf(Processes);
     s.should.have.property('instantiated').and.equal(false);
     s.should.have.property('started').and.equal(false);
     s.should.have.property('docker').and.equal(docker);

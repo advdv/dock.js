@@ -14,6 +14,7 @@ Promise.onPossiblyUnhandledRejection(function(error){
 var Dock = require('../lib/dock');
 var Service = require('../lib/service');
 var Repository = require('../lib/repository');
+var Processes = require('../lib/processes');
 
 describe('Dock()', function(){
   'use strict';
@@ -37,6 +38,7 @@ describe('Dock()', function(){
     
     c.should.have.property('prefix').and.equal('');
     c.should.have.property('repository').and.be.instanceOf(Repository);
+    c.should.have.property('processes').and.be.instanceOf(Processes);
     c.should.have.property('docker').and.equal(docker);
 
     //test logger

@@ -13,7 +13,7 @@
     "url": "https://github.com/advanderveer/dock.js"
   },
   "dependencies": {
-    "dockerode": "~1.2.8",
+    "dockerode": "~1.2.9",
     "bluebird": "~1.0.5",
     "args-js": "~0.10.4",
     "winston": "~0.7.2",

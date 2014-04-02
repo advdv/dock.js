@@ -6,6 +6,7 @@ var sinon = require('sinon');
 
 var stubDockerode = require('./stubs/dockerode');
 var Container = require('../lib/container');
+var Processes = require('../lib/processes');
 var Configuration = require('../lib/configuration');
 var errors = require('../lib/errors');
 
@@ -38,6 +39,7 @@ describe('Container()', function(){
     con.should.have.property('imageTag').and.equal('nginx');
     con.should.have.property('logger').and.be.instanceOf(winston.Logger);
     con.should.have.property('configuration').and.be.instanceOf(Configuration);
+    con.should.have.property('processes').and.be.instanceOf(Processes);
 
     con = new Container(docker, 'nginx', 'test');
     con.should.have.property('name').and.equal('test');
@@ -50,6 +52,46 @@ describe('Container()', function(){
       container = new Container(docker, 'phpfpm');
       container2 = new Container(docker, 'nginx', 'myhttp');
     });
+
+    describe('.create() from processes', function(){
+
+      var processes, container3, container4;
+      beforeEach(function(){
+        processes = new Processes(docker);
+        container3 = new Container({docker: docker, imageTag: 'data', name: 'wkmb-data_0', processes: processes});
+        container4 = new Container({docker: docker, imageTag: 'mysql', name: 'wkmb-data_0', processes: processes});
+
+        processes.add({
+          ID: 'test',
+          Name: 'wkmb-data_0',
+          Image: 'data'
+        });
+
+      });
+
+      it('processes container is created equal', function(done){
+        container3.create().then(function(containerId){
+          containerId.should.equal('test');
+
+          container3.id.should.equal('test');
+
+          done();
+        });
+      });
+
+      it('processes container is not created euqal', function(done){
+        container4.create().then(function(containerId){
+
+          containerId.should.not.equal('test');
+          container4.processes.has('wkmb-data_0').should.equal(false);
+
+          done();
+        });
+      });
+
+    });
+
+
 
     it('should handle create fails', function(done){      
       container.configuration.creating = {errorMe: true};

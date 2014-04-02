@@ -21,6 +21,32 @@ module.exports = function stubDockerode(docker) {
   });
 
 
+  //list all containers
+  sinon.stub(docker, "listContainers", function(opts, cb){
+    setTimeout(function(){
+      cb(false, [ 
+        { 
+          Command: '/usr/lib/postgresql/9.3/bin/postgres -D /etc/postgresql/9.3/main',
+          Created: 1396362124,
+          Id: '2abddfe551decfde0018adbce7efd0bb3213846f34517b5cc8d35a7d2baf8643',
+          Image: 'stepshape/wkmb/pgsql:latest',
+          Names: [ '/wkmb-sql_0' ],
+          Ports: [ [Object] ],
+          Status: 'Up 6 seconds'
+        },{
+          Command: '/usr/sbin/nginx ',
+          Created: 1396362103,
+          Id: '93b8cb7511bf1dee5be0966b0fa6caf1eb466be1fd7c39ee4b08e667b9b65caf',
+          Image: 'stepshape/wkmb/nginx:latest',
+          Names: [ '/wkmb-http_0' ],
+          Ports: [ [Object] ],
+          Status: 'Up 27 seconds' 
+        } 
+      ]);
+    }, Math.floor((Math.random()*20)+1));
+  });
+
+  //build image
   sinon.stub(docker, 'buildImage', function(file, conf, cb){
     setTimeout(function(){
       var stream = new Readable();
@@ -51,6 +77,7 @@ module.exports = function stubDockerode(docker) {
 
   //getContainer
   sinon.stub(docker, "getContainer", function(id){
+    
     var c = new StubContainer(id);
 
     c.start = docker.startContainer;
