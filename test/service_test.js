@@ -171,6 +171,11 @@ describe('Service()', function(){
 
 
     describe('.pipe()', function(){
+      it('should return service instance', function(){
+        var res = service.pipe(process.stdout);
+        res.should.equal(service);
+      });
+
       it('should pipe first container by default', function(){
         var c1 = new Container(docker, 'nginx');
         service.pipe(process.stdout);

@@ -172,7 +172,7 @@ describe('Image()', function(){
       img.build().should.equal(p);
 
       p.catch(function(err){
-        err.message.should.equal('test error');
+        err.message.should.startWith('Docker build returned error');
         done();
       });
     });
