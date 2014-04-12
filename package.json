@@ -1,6 +1,6 @@
 {
   "name": "dock.js",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "An easy to use Node.js module that orchestrates Docker containers that handles interdependencies for you.",
   "main": "index.js",
   "scripts": {
@@ -13,11 +13,11 @@
     "url": "https://github.com/advanderveer/dock.js"
   },
   "dependencies": {
-    "dockerode": "~1.2.9",
-    "bluebird": "~1.0.5",
     "args-js": "~0.10.4",
-    "winston": "~0.7.2",
-    "temp": "~0.7.0"
+    "bluebird": "~1.2.2",
+    "dockerode": "~1.2.9",
+    "temp": "~0.7.0",
+    "winston": "~0.7.2"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
