@@ -32,10 +32,14 @@ describe('Image()', function(){
     
     img.should.have.property('options');
     img.should.have.property('buildConf').and.eql({});
+    img.should.have.property('pushConf').and.eql({});
     img.should.have.property('logger').and.be.instanceOf(winston.Logger);
+    img.should.have.property('pushing').and.equal(false);
     img.should.have.property('tarred').and.equal(false);
     img.should.have.property('built').and.equal(false);
     img.should.have.property('imageTag').and.equal('sandbox:latest');
+    img.should.have.property('imageName').and.equal('sandbox');
+    img.should.have.property('imageVersion').and.equal('latest');
 
     var img1 = new Image(docker, './', 'test');
     var img2 = new Image({docker: docker, contextDir: __dirname + '/./fixtures/docker', imageTag: 'sandbox:latest', from: img1 });
@@ -51,7 +55,7 @@ describe('Image()', function(){
     Image.normalizeTag('user/rep:12.3').should.equal('user/rep:12.3');
     Image.normalizeTag('user/rep:').should.equal('user/rep:latest');    
     Image.normalizeTag('user/rep').should.equal('user/rep:latest');    
-    Image.normalizeTag('user/rep:huh:huh').should.equal('user/rep:huh:huh');    
+    Image.normalizeTag('reg.stepshape.com:5000/sandbox').should.equal('reg.stepshape.com:5000/sandbox:latest');
 
   });
 
@@ -196,7 +200,20 @@ describe('Image()', function(){
         done();        
       });
     });
-
   });
 
+  describe('.push()', function(){
+    it('should return a promise', function(){
+      var conf = {};
+      var img = new Image({docker: docker, contextDir: __dirname + '/fixtures/docker', imageTag: 'sandbox:latest', buildConf: conf });
+      sinon.spy(img, 'build');      
+      var p = img.push();
+      
+      p.should.be.instanceOf(Promise);
+      img.build.calledOnce.should.equal(true);
+    });
+
+    // @todo add more test for push status parsing
+  });
+  
 });

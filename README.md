@@ -27,6 +27,7 @@ Todos
 ------
 This library is still in early development
 
+-   create getLink() method on dock that returns precise container name by service name
 -   implement Processes.isCreatedEqual()
 -   pipe process stdin to container, so process and container can be killed using ctrl-c?
 -  	unexpected single char prefixing piping container output e.g  "~2014-03-07 10:58:16 UTC LOG:  received sm.."
