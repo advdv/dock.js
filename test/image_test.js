@@ -35,6 +35,7 @@ describe('Image()', function(){
     img.should.have.property('pushConf').and.eql({});
     img.should.have.property('logger').and.be.instanceOf(winston.Logger);
     img.should.have.property('pushing').and.equal(false);
+    img.should.have.property('tagging').and.equal(false);
     img.should.have.property('tarred').and.equal(false);
     img.should.have.property('built').and.equal(false);
     img.should.have.property('imageTag').and.equal('sandbox:latest');
@@ -221,4 +222,23 @@ describe('Image()', function(){
     // @todo add more test for push status parsing
   });
   
+  describe('.tag()', function(){
+    it('should return a promise', function(){
+      var img = new Image({docker: docker, contextDir: __dirname + '/fixtures/docker', imageTag: 'sandbox:latest'});
+      var p = img.tag();
+      
+      p.should.be.instanceOf(Promise);
+    });
+
+    it('should tag succesfull and allow tagging again', function(done){
+      var img = new Image({docker: docker, contextDir: __dirname + '/fixtures/docker', imageTag: 'sandbox:latest'});
+      img.tag().then(function(){
+
+        img.tagging.should.equal(false);
+        done();
+      });
+    });
+
+  });
+
 });
