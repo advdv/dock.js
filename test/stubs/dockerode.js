@@ -1,10 +1,10 @@
 
 /* global setTimeout, Buffer */
 var sinon = require('sinon');
-var crypto = require('crypto');
 var Readable = require('stream').Readable;
 
 var StubContainer = require('./dockerode_container.js');
+var StubImage = require('./dockerode_image.js');
 
 module.exports = function stubDockerode(docker) {
   'use strict';
@@ -46,6 +46,7 @@ module.exports = function stubDockerode(docker) {
     }, Math.floor((Math.random()*20)+1));
   });
 
+
   //build image
   sinon.stub(docker, 'buildImage', function(file, conf, cb){
     setTimeout(function(){
@@ -75,7 +76,14 @@ module.exports = function stubDockerode(docker) {
     },Math.floor((Math.random()*20)+1));
   });
 
-  //getContainer
+
+  //get image
+  sinon.stub(docker, 'getImage', function(name){
+    var i = new StubImage(name);
+    return i;
+  });
+
+  //get Container
   sinon.stub(docker, "getContainer", function(id){
     
     var c = new StubContainer(id);

@@ -197,20 +197,25 @@ describe('Image()', function(){
         img1.build.calledOnce.should.equal(true);
         img1.tar.calledBefore(img2.tar).should.equal(true);
 
-        done();        
+        done();
       });
     });
   });
 
   describe('.push()', function(){
     it('should return a promise', function(){
-      var conf = {};
-      var img = new Image({docker: docker, contextDir: __dirname + '/fixtures/docker', imageTag: 'sandbox:latest', buildConf: conf });
-      sinon.spy(img, 'build');      
+      var img = new Image({docker: docker, contextDir: __dirname + '/fixtures/docker', imageTag: 'sandbox:latest'});
       var p = img.push();
       
       p.should.be.instanceOf(Promise);
-      img.build.calledOnce.should.equal(true);
+    });
+
+    it('should push succesfull and allow pushing again', function(done){
+      var img = new Image({docker: docker, contextDir: __dirname + '/fixtures/docker', imageTag: 'sandbox:latest'});
+      img.push().then(function(){
+        img.pushing.should.equal(false);
+        done();
+      });
     });
 
     // @todo add more test for push status parsing
